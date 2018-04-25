@@ -1,4 +1,3 @@
-
 <!doctype html>
 <html lang="ru">
 <head>
@@ -6,56 +5,37 @@
     <meta charset="utf-8">
 </head>
 <body>
-<h1>Работа с БД</h1><br>
-
-
-<div>
-<form action="newtable.php" method="POST">
- <input type="text" name="cr_table" value="Название таблицы">
- <input type="submit" value="Создать">
- </form>
-</div>
- 
-
-
+  <h1>Работа с БД</h1><br>
+  <div>
+    <form action="newtable.php" method="POST">
+      <input type="text" name="cr_table" value="Название таблицы">
+       <input type="submit" value="Создать">
+    </form>
+  </div>
 
 </body>
 </html>
 
 <?php
 
-
-include("config2.php");
-
-
-if (empty($_GET['oper']))
-{
-    $oper = null;
-} else
-{
-    $oper = (string)$_GET['oper'];
-}
-
+include("function.php");
 
 $sql = "SHOW TABLES";
 $stm = $pdo->prepare($sql);
 $stm->execute();
-
 $tables = [];
 $listTables = $stm->fetchAll();
 foreach ($listTables as $item) {
     $tables[] = $item[0];
 }
-
 $table = null;
 if (!empty($_GET['table'])) {
     $sql = "DESCRIBE " . $_GET['table'];
+    $nametable = $_GET['table']; 
     $stm = $pdo->prepare($sql);
-    $stm->execute();
-    
+    $stm->execute();  
     $table = $stm->fetchAll();
 }
-
 ?>
 
 <style>
@@ -63,7 +43,6 @@ if (!empty($_GET['table'])) {
         border-spacing: 0;
         border-collapse: collapse;
     }
-
     table td, table th {
         border: 1px solid #ccc;
         padding: 5px;
@@ -73,43 +52,58 @@ if (!empty($_GET['table'])) {
 
 <h4>Структура таблицы</h4>
 <div style="margin-bottom: 20px;">
-    <form method="GET">
-        <label for="table">Выберите таблицу:</label>
-        <select name="table">
-            <?php foreach ($tables as $key => $item): ?>
-                <option value="<?php echo $item?>"><?php echo $item?></option>
-            <?php endforeach; ?>
-        </select>
-        <input type="submit" value="Показать таблицу" />
+  <form method="GET">
+    <label for="table">Выберите таблицу:</label>
+    <select name="table">
+      <?php foreach ($tables as $key => $item): ?>
+      <option value="<?php echo $item?>"><?php echo $item?></option>
+      <?php endforeach; ?>
+    </select>
+    <input type="submit" value="Показать таблицу" />
         
-    </form>
+  </form>
 </div>
 <div style="clear: both"></div>
 <table>
-    <tr>
-        <th>Поле</th>
-        <th>Тип</th>
-        <th>Изменить поле</th>
-        <th>Изменить тип</th>
-    </tr>
+  <tr>
+    <th>Поле</th>
+    <th>Тип</th>
+    <th>Изменить поле</th>
+    <th>Изменить тип</th>
+    <th>Удалить поле</th>
+  </tr>
 <?php
-
-
-
-
 if (!empty($table)) {
-    foreach ($table as $row) 
+	
+	$row = 0;
+    foreach ($table as $rows) 
+   
 {
-        echo "<tr>";
-        echo "<td>" . $row['Field'] . "</td>";
-        echo "<td>" . $row['Type'] . "</td>";
-        echo "  <td> <a href= changeCaption.php" . "?table=" . $_GET['table'] . "&cap=" . $row['Field'] . ">Изменить заголовок</a>&nbsp;</td>";
-        
-        
-         echo "</tr>";
-    }
-}
+	 $row++;
 ?>
+  <tr>
+    <td> "<?=$rows['Field']?>" </td>
+    <td> "<?=$rows['Type']?>" </td>
+    <td><a href="<?= '?table='.$nametable."&oper=edit".'&field='.$rows['Field'].'&types='.$rows['Type'] ?>  "> Изменить название </a> </td>
+    <td>   <a href="<?= '?table='.$nametable."&oper=edittype".'&field='.$rows['Field'].'&types='.$rows['Type'] ?>  "> Изменить тип </a> </td>    
+    <td>   <a href="<?= '?table='.$nametable."&oper=delete".'&field='.$rows['Field'] ?>  "> Удалить </a> </td> 
+        <!--<td>   <form method="GET">
+       <?php
+       $variables = '?table='.$nametable.'&oper=edittype'.'&field='.$rows['Field'];
+       ?>
+        <select name="<?= $variables ?>  ">
+            <?php foreach ($types as $type): ?>
+                <option value="<?php echo $type?>"><?php echo $type?></option>
+            <?php endforeach; ?>
+        </select>
+        <input type="submit" value="Изменить тип" />
+        
+    </form> </td>  -->
+           
+      
+   </tr>
+<?php     
+    }
+}?>
+
 </table>
-
-
